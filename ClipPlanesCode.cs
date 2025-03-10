@@ -11,8 +11,19 @@ namespace ClipPlanes
     {
         static void Main()
         {
-            var points = new List<Point>();
+            var visibleViews = ViewHandler.GetVisibleViews();
+            while (visibleViews.MoveNext())
+            {
+                var currentView = visibleViews.Current;
+                var clipPlanes = currentView.GetClipPlanes();
+                foreach (ClipPlane clipPlane in clipPlanes)
+                {
+                    clipPlane.Delete();
+                }
+            }
+            visibleViews.Reset();
 
+            var points = new List<Point>();
             var model = new Model();
 
             ModelObjectEnumerator.AutoFetch = true;
@@ -34,21 +45,9 @@ namespace ClipPlanes
             var maxZPoint = points.OrderByDescending(p => p.Z).First();
             var minZPoint = points.OrderByDescending(p => p.Z).Last();
 
-            maxZPoint.Z = maxZPoint.Z + 50;
-            minZPoint.Z = minZPoint.Z - 250;
+            maxZPoint.Z += 50;
+            minZPoint.Z -= 250;
 
-            var visibleViews = ViewHandler.GetVisibleViews();
-            while (visibleViews.MoveNext())
-            {
-                var currentView = visibleViews.Current;
-                var clipPlanes = currentView.GetClipPlanes();
-                foreach (ClipPlane clipPlane in clipPlanes)
-                {
-                    clipPlane.Delete();
-                }
-            }
-
-            visibleViews.Reset();
             while (visibleViews.MoveNext())
             {
                 var upPlane = new ClipPlane();
