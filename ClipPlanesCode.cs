@@ -11,17 +11,17 @@ namespace ClipPlanes
     {
         static void Main()
         {
-            var visibleViews = ViewHandler.GetVisibleViews();
-            while (visibleViews.MoveNext())
+            var mve = ViewHandler.GetVisibleViews();
+            while (mve.MoveNext())
             {
-                var currentView = visibleViews.Current;
+                var currentView = mve.Current;
                 var clipPlanes = currentView.GetClipPlanes();
                 foreach (ClipPlane clipPlane in clipPlanes)
                 {
                     clipPlane.Delete();
                 }
             }
-            visibleViews.Reset();
+            mve.Reset();
 
             var points = new List<Point>();
             var model = new Model();
@@ -29,6 +29,11 @@ namespace ClipPlanes
             ModelObjectEnumerator.AutoFetch = true;
             var mos = new ModelObjectSelector();
             var moe = mos.GetSelectedObjects();
+
+            if (moe.GetSize() == 0)
+            {
+                return;
+            }
 
             while (moe.MoveNext())
             {
@@ -48,16 +53,16 @@ namespace ClipPlanes
             maxZPoint.Z += 50;
             minZPoint.Z -= 250;
 
-            while (visibleViews.MoveNext())
+            while (mve.MoveNext())
             {
                 var upPlane = new ClipPlane();
-                upPlane.View = visibleViews.Current;
+                upPlane.View = mve.Current;
                 upPlane.UpVector = new Vector(0, 0, 1);
                 upPlane.Location = maxZPoint;
                 upPlane.Insert();
 
                 var downPlane = new ClipPlane();
-                downPlane.View = visibleViews.Current;
+                downPlane.View = mve.Current;
                 downPlane.UpVector = new Vector(0, 0, -1);
                 downPlane.Location = minZPoint;
                 downPlane.Insert();
