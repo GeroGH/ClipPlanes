@@ -3,7 +3,6 @@ using System.Linq;
 using Tekla.Structures.Geometry3d;
 using Tekla.Structures.Model;
 using Tekla.Structures.Model.UI;
-using ModelObjectSelector = Tekla.Structures.Model.UI.ModelObjectSelector;
 
 namespace ClipPlanes
 {
@@ -27,7 +26,7 @@ namespace ClipPlanes
             var model = new Model();
 
             ModelObjectEnumerator.AutoFetch = true;
-            var mos = new ModelObjectSelector();
+            var mos = new Tekla.Structures.Model.UI.ModelObjectSelector();
             var moe = mos.GetSelectedObjects();
 
             if (moe.GetSize() == 0)
@@ -50,23 +49,57 @@ namespace ClipPlanes
             var maxZPoint = points.OrderByDescending(p => p.Z).First();
             var minZPoint = points.OrderByDescending(p => p.Z).Last();
 
-            maxZPoint.Z += 50;
-            minZPoint.Z -= 250;
+            var offset = 887;
+            OffsetPointInXYZ(maxZPoint, offset);
+            OffsetPointInXYZ(minZPoint, -offset);
 
-            while (mve.MoveNext())
+            using (var dialog = new OptionSelectionForm())
             {
-                var upPlane = new ClipPlane();
-                upPlane.View = mve.Current;
-                upPlane.UpVector = new Vector(0, 0, 1);
-                upPlane.Location = maxZPoint;
-                upPlane.Insert();
+                dialog.ShowDialog();
 
-                var downPlane = new ClipPlane();
-                downPlane.View = mve.Current;
-                downPlane.UpVector = new Vector(0, 0, -1);
-                downPlane.Location = minZPoint;
-                downPlane.Insert();
+                switch (dialog.SelectedOption)
+                {
+                    case UserOption.DirectionX:
+                        while (mve.MoveNext())
+                        {
+                            CreateClipPlane(mve, maxZPoint, new Vector(1, 0, 0));
+                            CreateClipPlane(mve, minZPoint, new Vector(-1, 0, 0));
+                        }
+                        break;
+
+                    case UserOption.DirectionY:
+                        while (mve.MoveNext())
+                        {
+                            CreateClipPlane(mve, maxZPoint, new Vector(0, 1, 0));
+                            CreateClipPlane(mve, minZPoint, new Vector(0, -1, 0));
+                        }
+                        break;
+
+                    case UserOption.DirectionZ:
+                        while (mve.MoveNext())
+                        {
+                            CreateClipPlane(mve, maxZPoint, new Vector(0, 0, 1));
+                            CreateClipPlane(mve, minZPoint, new Vector(0, 0, -1));
+                        }
+                        break;
+                }
             }
+        }
+
+        private static void CreateClipPlane(ModelViewEnumerator mve, Point maxZPoint, Vector vector)
+        {
+            var upPlane = new ClipPlane();
+            upPlane.View = mve.Current;
+            upPlane.UpVector = vector;
+            upPlane.Location = maxZPoint;
+            upPlane.Insert();
+        }
+
+        private static void OffsetPointInXYZ(Point point, double offset)
+        {
+            point.X += offset;
+            point.Y += offset;
+            point.Z += offset;
         }
     }
 }
