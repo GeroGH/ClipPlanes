@@ -12,25 +12,23 @@ public enum UserOption
 }
 public partial class OptionSelectionForm : Form
 {
-    private Button buttonY;
-    private Button buttonZ;
-    private TextBox textBox1;
+    private System.Windows.Forms.Button buttonY;
+    private System.Windows.Forms.Button buttonZ;
+    private System.Windows.Forms.TextBox textBox1;
     private ContextMenuStrip contextMenuStrip1;
     private System.ComponentModel.IContainer components;
     private GroupBox groupBox1;
     private GroupBox groupBox2;
-    private TextBox textBox2;
-    private Button buttonClearPlanes;
+    private System.Windows.Forms.TextBox textBox2;
+    private System.Windows.Forms.Button buttonClearPlanes;
     private GroupBox groupBox3;
     private GroupBox groupBox4;
-    private Button buttonX;
+    private System.Windows.Forms.Button buttonX;
 
     public UserOption SelectedOption { get; private set; }
     public OptionSelectionForm()
     {
         this.InitializeComponent();
-        this.StartPosition = FormStartPosition.Manual;
-        this.Location = new Point(Cursor.Position.X - this.Width / 2, Cursor.Position.Y - this.Height / 2);
     }
     private void ButtonX_Click(object sender, EventArgs e)
     {
@@ -53,7 +51,6 @@ public partial class OptionSelectionForm : Form
     }
     private void InitializeComponent()
     {
-        this.TopMost = true;
         this.components = new System.ComponentModel.Container();
         this.buttonX = new System.Windows.Forms.Button();
         this.buttonY = new System.Windows.Forms.Button();
@@ -114,6 +111,7 @@ public partial class OptionSelectionForm : Form
         this.textBox1.Name = "textBox1";
         this.textBox1.Size = new System.Drawing.Size(151, 20);
         this.textBox1.TabIndex = 3;
+        this.textBox1.TextChanged += new System.EventHandler(this.TextBox1_TextChanged);
         // 
         // contextMenuStrip1
         // 
@@ -146,6 +144,7 @@ public partial class OptionSelectionForm : Form
         this.textBox2.Name = "textBox2";
         this.textBox2.Size = new System.Drawing.Size(146, 20);
         this.textBox2.TabIndex = 3;
+        this.textBox2.TextChanged += new System.EventHandler(this.TextBox2_TextChanged);
         // 
         // buttonClearPlanes
         // 
@@ -191,6 +190,9 @@ public partial class OptionSelectionForm : Form
         this.Location = new System.Drawing.Point(4128, 84);
         this.Name = "OptionSelectionForm";
         this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
+        this.TopMost = true;
+        this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.OptionSelectionForm_FormClosed);
+        this.Load += new System.EventHandler(this.OptionSelectionForm_Load);
         this.groupBox1.ResumeLayout(false);
         this.groupBox1.PerformLayout();
         this.groupBox2.ResumeLayout(false);
@@ -198,5 +200,45 @@ public partial class OptionSelectionForm : Form
         this.groupBox3.ResumeLayout(false);
         this.groupBox4.ResumeLayout(false);
         this.ResumeLayout(false);
+
+    }
+
+    private void OptionSelectionForm_Load(object sender, EventArgs e)
+    {
+        var currentScreen = Screen.FromPoint(Cursor.Position);
+        var workingArea = currentScreen.WorkingArea;
+        this.Location = new Point(workingArea.Right - this.Width - 50, workingArea.Top + 150);
+        this.textBox1.Text = ClipPlanes.Properties.Settings.Default.UpDistance.ToString();
+        this.textBox2.Text = ClipPlanes.Properties.Settings.Default.DownDistance.ToString();
+    }
+
+    private void TextBox1_TextChanged(object sender, EventArgs e)
+    {
+        if (int.TryParse(this.textBox1.Text, out var value))
+        {
+            ClipPlanes.Properties.Settings.Default.UpDistance = value;
+            ClipPlanes.Properties.Settings.Default.Save();
+        }
+    }
+
+    private void TextBox2_TextChanged(object sender, EventArgs e)
+    {
+        if (int.TryParse(this.textBox2.Text, out var value))
+        {
+            ClipPlanes.Properties.Settings.Default.DownDistance = value;
+            ClipPlanes.Properties.Settings.Default.Save();
+        }
+    }
+
+    private void OptionSelectionForm_FormClosed(object sender, FormClosedEventArgs e)
+    {
+        if (int.TryParse(this.textBox1.Text, out var upValue))
+            ClipPlanes.Properties.Settings.Default.UpDistance = upValue;
+
+        if (int.TryParse(this.textBox2.Text, out var downValue))
+            ClipPlanes.Properties.Settings.Default.DownDistance = downValue;
+
+        ClipPlanes.Properties.Settings.Default.Save();
+        ClipPlanesCode.Execute(UserOption.ClearPlanes);
     }
 }

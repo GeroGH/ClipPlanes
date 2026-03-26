@@ -60,8 +60,6 @@ namespace ClipPlanes
 
         private static bool ExtractPoints(UserOption direction)
         {
-            const double offset = 250;
-
             var points = new List<Point>();
             var selector = new Tekla.Structures.Model.UI.ModelObjectSelector();
             var objects = selector.GetSelectedObjects();
@@ -100,8 +98,8 @@ namespace ClipPlanes
                     break;
             }
 
-            OffsetPoint(MaxPoint, offset, direction);
-            OffsetPoint(MinPoint, -offset, direction);
+            OffsetPoint(MaxPoint, Properties.Settings.Default.UpDistance, direction);
+            OffsetPoint(MinPoint, -Properties.Settings.Default.DownDistance, direction);
 
             return true;
         }
