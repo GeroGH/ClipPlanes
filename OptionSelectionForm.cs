@@ -239,6 +239,5 @@ public partial class OptionSelectionForm : Form
             ClipPlanes.Properties.Settings.Default.DownDistance = downValue;
 
         ClipPlanes.Properties.Settings.Default.Save();
-        ClipPlanesCode.Execute(UserOption.ClearPlanes);
     }
 }
